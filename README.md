@@ -1,1 +1,1 @@
-# Course-design-project
+学校的一些课程设计，参加比赛的项目
