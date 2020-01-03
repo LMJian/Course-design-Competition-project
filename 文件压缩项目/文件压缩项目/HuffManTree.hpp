@@ -73,7 +73,6 @@ public:
 		root_ = que_.top();
 	}
 	void WriteBind() {
-
 		FILE *pRead = fopen(fileName_.c_str(), "r");
 		FILE *pWrite = fopen("test.bin", "wb");
 		if (pRead == NULL || pWrite == NULL) {
@@ -85,18 +84,14 @@ public:
 		while (1) {
 			int n = fread(buf, 1, 1024, pRead);
 			for (int i = 0; i < n; ++i) {
-				++count[buf[i]];
+				//
 			}
 			if (n < 1024)
 				break;
 		}
-		for (int i = 0; i < 256; ++i) {
-			if (count[i] > 0) {
-				Node * ptr = new Node(count[i], i);
-				que_.push(ptr);
-			}
-		}
-		fclose(pFile);
+	
+		fclose(pRead);
+		fclose(pWrite);
 	}
 private:
 	Node* root_;
