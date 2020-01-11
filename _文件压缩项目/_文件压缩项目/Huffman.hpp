@@ -28,7 +28,6 @@ public:
 	{
 		return pLeft->_Weight > pRight->_Weight;  //根据大于的方式构造出小根堆
 	}
-
 };
 
 template<class T>

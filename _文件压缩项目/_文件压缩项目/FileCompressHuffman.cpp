@@ -49,7 +49,8 @@ void FileCompressHuffman::CompressFile(const std::string& path)
 		assert(false);
 		return;
 	}
-	WriteHead(fOut, path);
+	WriteHead(fOut, path);           //1111111111
+	
 	fseek(fIn, 0, SEEK_SET);
 	int ch = 0;
 	int bitCount = 0;
@@ -117,7 +118,8 @@ void FileCompressHuffman::UnCompressFile(const std::string& path) {
 	HuffmanTree<CharInfo> t;
 	t.CreateHuffmanTree(_fileInfo, CharInfo(0));
 	
-	FILE* fOut = fopen("3.txt","wb");
+	std::string newFileName= "tu"+ strFilePostFix;
+	FILE* fOut = fopen(newFileName.c_str(),"wb");
 	char *pReadBuff = new char[1024];
 	char ch = 0;
 	HuffmanTreeNode<CharInfo>* pCur = t.GetRoot();
@@ -148,10 +150,11 @@ void FileCompressHuffman::UnCompressFile(const std::string& path) {
 				}
 			}
 		}
-		fclose(fIn);
-		fclose(fOut);
-		delete[] pReadBuff;
+		
 	}
+	fclose(fIn);
+	fclose(fOut);
+	delete[] pReadBuff;
 }
 void FileCompressHuffman::ReadLine(FILE* fIn, std::string& strInfo) {
 	assert(fIn);
@@ -168,6 +171,7 @@ void FileCompressHuffman::WriteHead(FILE* fOut, const std::string& fileName) {
 	std::string strHead;
 	strHead += GetFilePostFix(fileName);
 	strHead += '\n';
+
 	size_t lineCount = 0;
 	std::string strChCount;
 	char szValue[32] = { 0 };
