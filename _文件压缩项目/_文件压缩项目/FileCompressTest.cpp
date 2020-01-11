@@ -8,5 +8,6 @@ int main()
 	fc.CompressFile("tu.png");
 	fc.UnCompressFile("2.txt");
 
+
 	return 0;
 }
