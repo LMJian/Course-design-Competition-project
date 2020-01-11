@@ -3,15 +3,17 @@
 #include"FileExtractionHuffmanTree.hpp"
 
 void TestFileCompression() {       //测试压缩
-	FileCompressionHuffManTree tree("IMG_5392.MP4");   //指定要压缩的文件
+	FileCompressionHuffManTree tree("test.txt");   //指定要压缩的文件
 	tree.InitQue();                
 	tree.InitTree();             
 	tree.WriteBin();              
 }
 
 void TestFileExtraction() {        //测试解压
-	FileExtractionHuffManTree tree("IMG_5392.bin");    //指定要解压的文件
-	tree.InitTree();       
+	FileExtractionHuffManTree tree("test.bin");    //指定要解压的文件
+	tree.InitQue();
+	tree.InitTree();
+	tree.UnCompress();
 }
 
 int main() {

@@ -3,6 +3,7 @@
 #include<fstream>
 #include<queue>
 #include<string>
+#include<stack>
 using namespace std;
 
 struct HuffManTreeNode {
@@ -34,8 +35,18 @@ public:
 		, root_(nullptr)
 	{}
 	~FileCompressionHuffManTree() {
-		//释放二叉树节点空间
-		//未完成
+		stack<PNode> sa;
+		PNode ptr = root_;
+		while (!sa.empty() || ptr) {
+			while (ptr) {
+				sa.push(ptr);
+				ptr = ptr->pLeft_;
+			}
+			PNode del = sa.top();
+			sa.pop();
+			ptr = del->pRight_;
+			delete del;
+		}
 	}
 	void InitQue() {
 		FILE *pFile = fopen(fileName_.c_str(), "rb");//因为这里压缩的不一定是文本文件
@@ -49,15 +60,14 @@ public:
 		while (1) {
 			int n = fread(buf, 1, 1024, pFile);
 			for (int i = 0; i < n; ++i) {
-				++count[buf[i]];
+				++count_[buf[i]];
 			}
 			if (n < 1024)
 				break;
 		}
-		//以字符出现的次数为权值创建Huffman树
 		for (int i = 0; i < 256; ++i) {
-			if (count[i] > 0) {              //筛选出现过的字符，压入队列
-				PNode ptr = new Node(count[i], i);
+			if (count_[i] > 0) {              //筛选出现过的字符，压入队列
+				PNode ptr = new Node(count_[i], i);
 				que_.push(ptr);
 			}
 		}
@@ -80,7 +90,8 @@ public:
 	}
 	void WriteBin() {     //开始压缩
 		if (root_)
-			InitChPW(root_, "");    //获取每个字符对应的密码
+			InitChPW(root_, "");    //获取每个字符对应的密码，          （此处是递归需要优化）
+		
 		string BinFileName = fileName_.substr(0, fileName_.rfind('.'));
 		BinFileName += ".bin";
 		FILE *pWrite = fopen(BinFileName.c_str(), "wb");
@@ -90,12 +101,12 @@ public:
 		}
 		//写入头部信息
 		string headstr = "";
-		string EndFormat= fileName_.substr(fileName_.rfind('.'));//写入文件尾部格式
+		string EndFormat= fileName_.substr(fileName_.rfind('.'));//文件尾部格式
 		int rows = 0;
 		for (int i = 0; i < 256; ++i) {
-			if (count[i] > 0) {
+			if (count_[i] > 0) {
 				unsigned char ch = i;
-				int ret = count[i];
+				int ret = count_[i];
 				char str[1024] = { 0 };
 				sprintf(str, "%c:%d\n", ch, ret);
 				headstr += str;
@@ -119,8 +130,8 @@ public:
 		while (1) {
 			int n = fread(buf, 1, 1024, pRead);
 			for (int i = 0; i < n; ++i) {
-				string passWord = charPassWord[buf[i]];        //读取buf[i]对应的密码
-				for (int j = 0; j < passWord.size(); ++j) {
+				string passWord = charPassWord_[buf[i]];        //读取buf[i]对应的密码
+				for (size_t j = 0; j < passWord.size(); ++j) {
 					ch <<= 1;
 					++index;
 					if (passWord[j] == '1') {
@@ -147,7 +158,7 @@ public:
 private:
 	void InitChPW(PNode ptr,string pw) {
 		if (!ptr->pLeft_ && !ptr->pRight_) {    //当它为叶子节点时
-			charPassWord[ptr->Ch_] = pw;
+			charPassWord_[ptr->Ch_] = pw;
 			return;
 		}
 		if (ptr->pLeft_)
@@ -158,6 +169,6 @@ private:
 	PNode root_;                                       //树的根节点
 	string fileName_;                                  //要压缩的文件名
 	priority_queue<PNode,vector<PNode>,Less> que_;     //优先队列，小根堆
-	string charPassWord[256];                          //存放字符对应的密码
-	int count[256] = { 0 };                            //统计字符出现的次数	
+	string charPassWord_[256];                          //存放字符对应的密码
+	int count_[256] = { 0 };                            //统计字符出现的次数	
 };
