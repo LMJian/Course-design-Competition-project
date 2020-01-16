@@ -69,17 +69,21 @@ public:
 		string headstr = "";
 		string EndFormat= fileName_.substr(fileName_.rfind('.'));//文件尾部格式
 		int rows = 0;
+		char str[1024] = { 0 };
 		for (int i = 0; i < 256; ++i) {
 			if (count_[i] > 0) {
 				unsigned char ch = i;
 				int ret = count_[i];
-				char str[1024] = { 0 };
-				sprintf(str, "%c:%d\n", ch, ret);
+				//sprintf(str, "%c:%d\n", ch, ret);
+				//headstr += str;
+				headstr += ch;
+				headstr += ':';
+				_itoa(ret, str, 10);
 				headstr += str;
+				headstr += '\n';
 				++rows;
 			}
 		}
-		char str[1024] = { 0 };
 		sprintf(str, "%d\n", rows);
 		headstr = str + headstr;
 		headstr = EndFormat + '\n' + headstr;

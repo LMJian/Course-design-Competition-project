@@ -13,6 +13,7 @@ FileCompressHuffman::FileCompressHuffman()
 
 void FileCompressHuffman::CompressFile(const std::string& path)
 {
+	_fileName = path;
 	FILE* fIn = fopen(path.c_str(), "rb");
 	if (nullptr == fIn)
 	{
@@ -32,7 +33,6 @@ void FileCompressHuffman::CompressFile(const std::string& path)
 		for (size_t i = 0; i < readSize; i++)
 		{
 			_fileInfo[pReadBuff[i]]._count++;
-			//
 		}
 	}
 
@@ -118,7 +118,7 @@ void FileCompressHuffman::UnCompressFile(const std::string& path) {
 	HuffmanTree<CharInfo> t;
 	t.CreateHuffmanTree(_fileInfo, CharInfo(0));
 	
-	std::string newFileName= "tu"+ strFilePostFix;
+	std::string newFileName = "new" + _fileName;
 	FILE* fOut = fopen(newFileName.c_str(),"wb");
 	char *pReadBuff = new char[1024];
 	char ch = 0;

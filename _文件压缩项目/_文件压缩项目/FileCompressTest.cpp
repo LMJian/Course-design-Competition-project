@@ -5,9 +5,7 @@
 int main()
 {
 	FileCompressHuffman fc;
-	fc.CompressFile("tu.png");
+	fc.CompressFile("test.txt");
 	fc.UnCompressFile("2.txt");
-
-
 	return 0;
 }
