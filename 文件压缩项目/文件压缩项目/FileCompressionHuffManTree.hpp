@@ -4,7 +4,6 @@
 #include<queue>
 #include<string>
 #include<stack>
-using namespace std;
 
 struct HuffManTreeNode {
 	HuffManTreeNode(int weight, unsigned char ch = 0)
@@ -30,12 +29,12 @@ class FileCompressionHuffManTree {
 	typedef HuffManTreeNode Node;
 	typedef HuffManTreeNode* PNode;
 public:
-	FileCompressionHuffManTree(const string fileName)
+	FileCompressionHuffManTree(const std::string fileName)
 		:fileName_(fileName)
 		, root_(nullptr)
 	{}
 	~FileCompressionHuffManTree() {
-		stack<PNode> sa;
+		std::stack<PNode> sa;
 		PNode ptr = root_;
 		while (!sa.empty() || ptr) {
 			while (ptr) {
@@ -58,7 +57,7 @@ public:
 		if (root_)
 			InitChPW(root_);    //获取每个字符对应的密码，          （此处是递归需要优化）
 		
-		string BinFileName = fileName_.substr(0, fileName_.rfind('.'));
+		std::string BinFileName = fileName_.substr(0, fileName_.rfind('.'));
 		BinFileName += ".bin";
 		FILE *pWrite = fopen(BinFileName.c_str(), "wb");
 		if (pWrite == NULL) {
@@ -66,8 +65,8 @@ public:
 			return;
 		}
 		//写入头部信息
-		string headstr = "";
-		string EndFormat= fileName_.substr(fileName_.rfind('.'));//文件尾部格式
+		std::string headstr = "";
+		std::string EndFormat= fileName_.substr(fileName_.rfind('.'));//文件尾部格式
 		int rows = 0;
 		char str[1024] = { 0 };
 		for (int i = 0; i < 256; ++i) {
@@ -100,7 +99,7 @@ public:
 		while (1) {
 			int n = fread(buf, 1, 1024, pRead);
 			for (int i = 0; i < n; ++i) {
-				string passWord = charPassWord_[buf[i]];        //读取buf[i]对应的密码
+				std::string passWord = charPassWord_[buf[i]];        //读取buf[i]对应的密码
 				for (size_t j = 0; j < passWord.size(); ++j) {
 					ch <<= 1;
 					++index;
@@ -182,10 +181,10 @@ private:
 			passWord.erase(passWord.end() - 1);
 		}
 	}
-	string passWord = "";
+	std::string passWord = "";
 	PNode root_;                                       //树的根节点
-	string fileName_;                                  //要压缩的文件名
-	priority_queue<PNode,vector<PNode>,Less> que_;     //优先队列，小根堆
-	string charPassWord_[256];                          //存放字符对应的密码
+	std::string fileName_;                                  //要压缩的文件名
+	std::priority_queue<PNode,std::vector<PNode>,Less> que_;     //优先队列，小根堆
+	std::string charPassWord_[256];                          //存放字符对应的密码
 	int count_[256] = { 0 };                            //统计字符出现的次数	
 };

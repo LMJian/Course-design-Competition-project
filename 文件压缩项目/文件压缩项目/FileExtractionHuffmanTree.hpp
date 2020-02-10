@@ -5,12 +5,12 @@ class FileExtractionHuffManTree {
 	typedef HuffManTreeNode Node;
 	typedef HuffManTreeNode* PNode;
 public:
-	FileExtractionHuffManTree(const string fileName)
+	FileExtractionHuffManTree(const std::string fileName)
 		:fileName_(fileName)
 		, root_(nullptr)
 	{}
 	~FileExtractionHuffManTree() {
-		stack<PNode> sa;
+		std::stack<PNode> sa;
 		PNode ptr = root_;
 		while (!sa.empty() || ptr) {
 			while (ptr) {
@@ -34,7 +34,7 @@ public:
 
 		InitTree();      //将队列里的结点初始化为Huffman树
 
-		string newFileName = "new" + fileName_.substr(0, fileName_.rfind('.')) + endName_;
+		std::string newFileName = "new" + fileName_.substr(0, fileName_.rfind('.')) + endName_;
 		FILE *pWrite = fopen(newFileName.c_str(), "wb");
 		if (pWrite == NULL) {
 			perror("fopen file error!");
@@ -108,7 +108,7 @@ private:
 		}
 	}
 	PNode root_;                                       //树的根节点
-	string fileName_;                                  //要压缩的文件名
-	priority_queue<PNode, vector<PNode>, Less> que_;     //优先队列，小根堆
-	string endName_ = "";
+	std::string fileName_;                                  //要压缩的文件名
+	std::priority_queue<PNode, std::vector<PNode>, Less> que_;     //优先队列，小根堆
+	std::string endName_ = "";
 };
