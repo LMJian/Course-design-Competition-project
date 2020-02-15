@@ -23,6 +23,7 @@ int main() {
 	sec = (double)(end - start) / CLOCKS_PER_SEC;
 	printf("—πÀı∫ƒ ±%f√Î\n", sec);
 	_CrtDumpMemoryLeaks();
+
 	TestFileExtraction();
 	_CrtDumpMemoryLeaks();
 	system("pause");
