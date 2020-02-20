@@ -115,12 +115,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common.hpp" />
     <ClInclude Include="FileCompressHuffman.h" />
     <ClInclude Include="Huffman.hpp" />
+    <ClInclude Include="LZ77.hpp" />
+    <ClInclude Include="LZHashTable.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileCompressHuffman.cpp" />
     <ClCompile Include="FileCompressTest.cpp" />
+    <ClCompile Include="LZ77.cpp" />
+    <ClCompile Include="LZHashTable.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
