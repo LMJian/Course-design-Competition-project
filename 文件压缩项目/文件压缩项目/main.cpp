@@ -3,6 +3,7 @@
 #include"FileExtractionHuffmanTree.hpp"
 #include<time.h>
 #include<Windows.h>
+#include"LZ77.hpp"
 
 void TestFileCompression() {       //测试压缩
 	FileCompressionHuffManTree tree("test.txt");   //指定要压缩的文件             
@@ -15,7 +16,7 @@ void TestFileExtraction() {        //测试解压
 }
 
 int main() {
-	clock_t start, end;
+	/*clock_t start, end;
 	double sec = 0;
 	start = clock();
 	TestFileCompression();
@@ -25,7 +26,10 @@ int main() {
 	_CrtDumpMemoryLeaks();
 
 	TestFileExtraction();
-	_CrtDumpMemoryLeaks();
+	_CrtDumpMemoryLeaks();*/
+	LZ77 lz;
+	lz.CompressionFile("test.txt");
+
 	system("pause");
 	return 0;
 }

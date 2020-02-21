@@ -21,6 +21,9 @@
     <ClCompile Include="HashTable.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LZ77.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileExtractionHuffmanTree.hpp">
@@ -33,6 +36,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="HashTable.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LZ77.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
