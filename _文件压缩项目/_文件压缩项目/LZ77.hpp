@@ -8,9 +8,9 @@ public:
 	~LZ77();
 	void CompressFile(const std::string& strFilePath);
 	void UNCompressFile(const std::string& strFilePath);
-
 private:
-	UCH LongestMatch(USH matchHead, USH& curMatchDist, USH start);   //找最长匹配
-	UCH* pWin_;                                           //用来保存待压缩数据的缓冲区
+	USH LongestMatch(USH matchHead, USH& curMatchDist, USH start);      //找最长匹配
+	void WriteFlag(FILE* fOUT, UCH& chFlag, UCH& bitCount, bool isLen); //写标记文件
+	UCH* pWin_;                                                         //用来保存待压缩数据的缓冲区
 	LZHashTable ht_;
 };

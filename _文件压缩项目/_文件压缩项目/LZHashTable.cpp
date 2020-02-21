@@ -1,9 +1,9 @@
 #include"LZHashTable.hpp"
 #include<string.h>
 
-const USH HASH_BITS = 15;
-const USH HASH_SIZE = (1 << HASH_BITS);    //¹þÏ£µØÖ·¸öÊý32K¸ö
-const USH HASH_MASK = HASH_SIZE - 1;       //µÍ15Î»È«1
+const USH HASH_BITS = 15;                  //¹þÏ£µØÖ·15Î»
+const USH HASH_SIZE = (1 << HASH_BITS);    //¹þÏ£µØÖ·¸öÊý 32K
+const USH HASH_MASK = HASH_SIZE - 1;       //·ÀÖ¹Òç³ö  µÍ15Î»È«1
 
 LZHashTable::LZHashTable(USH size)
 	:prev_(new USH[size * 2])     //¹þÏ£±íÖÐ´æ·ÅµÄÊÇË÷Òý×Ö·û´®µÄÊ×µØÖ·(ÏÂ±ê)
@@ -16,15 +16,16 @@ LZHashTable::~LZHashTable() {
 	prev_ = nullptr;
 }
                          //matchHead£ºÆ¥ÅäÁ´µÄÍ·  
-						 //ch£ºËù²éÕÒ×Ö·û´®µÄ×îºóÒ»¸ö×Ö·û£¨µÚ3¸ö£© 
-						 //pos£º²éÕÒ×Ö·û´®Ê××Ö·ûÔÚ»º³åÇøµÄÏÂ±ê 
-						 //hashAddr£ºÉÏÒ»´Î²åÈëµÄ¹þÏ£µØÖ·       
+						 //ch£º²éÕÒ×Ö·û´®µÄµÚÈý¸ö×Ö·û(Ò²¾ÍÊÇ×îºóÒ»¸ö) 
+						 //pos£º²éÕÒ×Ö·û´®µÄÍ·
+						 //hashAddr£ºÊäÈëÊ±ÊÇÉÏÒ»´ÎµÄ¹þÏ£µØÖ·,Êä³öÊ±ÊÇ±¾´Î¹þÏ£µØÖ·       
 void LZHashTable::Insert(USH& matchHead, UCH ch, USH pos, USH& hashAddr) {
 	HashFunc(hashAddr, ch);   //»ñÈ¡±¾´Î²åÈëµÄ¹þÏ£µØÖ·
 	
 	matchHead = head_[hashAddr];//ÕÒµ±Ç°Èý¸ö×Ö·ûÔÚ²éÕÒ»º³åÇøÖÐÕÒµ½µÄ×î½üµÄÒ»¸ö£¬¼´Æ¥ÅäÁ´µÄÍ·
-
-	prev_[pos&HASH_MASK] = head_[hashAddr];//pos¿ÉÄÜ»á³¬¹ý32K£¬&MASKµÄÄ¿µÄ¾ÍÊÇÎªÁË²»Ô½½ç
+	
+	//½«ÐÂµÄ¹þÏ£µØÖ·²åÈëÁ´±í
+	prev_[pos&HASH_MASK] = head_[hashAddr];
 	head_[hashAddr] = pos;
 }
 
@@ -41,4 +42,8 @@ void LZHashTable::HashFunc(USH& hashAddr, UCH ch) {      //hashAddrÊÇÊäÈë£¬Êä³öÐ
 }
 USH LZHashTable::H_SHIFT() {
 	return (HASH_BITS + MIN_MATCH - 1) / MIN_MATCH;     //5
+}
+
+USH LZHashTable::GetNext(USH matchHead) {
+	return prev_[matchHead&HASH_MASK];
 }

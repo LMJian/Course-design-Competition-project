@@ -7,6 +7,7 @@ public:
 	~LZHashTable();
 	void Insert(USH& matchHead, UCH ch, USH pos, USH& hashAddr);
 	void HashFunc(USH& hashAddr, UCH ch);
+	USH GetNext(USH matchHead);
 private:
 	USH H_SHIFT();
 private:
