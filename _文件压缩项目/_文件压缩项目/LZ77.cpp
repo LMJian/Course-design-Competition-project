@@ -107,16 +107,59 @@ void LZ77 :: CompressFile(const std::string& strFilePath) {
 				++start;
 			}
 		}
+		//¼ì²âÏÈĞĞ»º³åÇøÖĞÊ£Óà×Ö·û¸öÊı
+		if (lookAhead <= MIN_LOOKAHEAD)
+			FillWindow(fIn, lookAhead, start);
 	}
+	
 	//±ê¼ÇÎ»ÊıÈç¹û²»¹»°ËÎ»
 	if (bitCount > 0 && bitCount < 8) {
 		chFlag <<= (8 - bitCount);
 		fputc(chFlag, fOutF);
 	}
-	//½«Ñ¹ËõÊı¾İÎÄ¼şºÍ±ê¼ÇĞÅÏ¢ÎÄ¼şºÏ²¢
+	fclose(fOutF);
+
+	MergeFile(fOUT, fileSize);
 	fclose(fIn);
 	fclose(fOUT);
-	fclose(fOutF);
+
+	//½«ÓÃÀ´±£´æ±ê¼ÇĞÅÏ¢µÄÁÙÊ±ÎÄ¼şÉ¾³ıµô
+}
+
+void LZ77::FillWindow(FILE* fIn, size_t& lookAhead, USH& start) {
+	//startÑ¹ËõÒÑ¾­½øĞĞµ½ÓÒ´°£¬ÏÈĞĞ»º³åÇøÊ£ÓàÊı¾İ²»¹»MIN_LOOKAHEAD
+	if (start >= WSIZE) {
+		//1.½«ÓÒ´°ÖĞµÄÊı¾İ°áÒÆµ½×ó´°
+		memcpy(pWin_, pWin_ + WSIZE, WSIZE);
+		memset(pWin_ + WSIZE, 0, WSIZE);
+		start -= WSIZE;
+
+		//2.¸üĞÂ¹şÏ£±í
+		ht_.Update();
+
+		//3.ÏòÓÒ´°ÖĞ²¹³äWSIZE¸öµÄ´ıÑ¹ËõÊı¾İ
+		if (!feof(fIn))
+			lookAhead += fread(pWin_ + WSIZE, 1, WSIZE, fIn);
+	}
+}
+void LZ77::MergeFile(FILE* fOut, ULL fileSize) {
+	//½«Ñ¹ËõÊı¾İÎÄ¼şºÍ±ê¼ÇĞÅÏ¢ÎÄ¼şºÏ²¢
+	//1.¶ÁÈ¡±ê¼ÇĞÅÏ¢ÎÄ¼şÖĞÄÚÈİ£¬È»ºó½«½á¹ûĞ´Èëµ½Ñ¹ËõÎÄ¼şÖĞ
+	FILE* fInf = fopen("3.txt", "rb");
+	size_t flagSize = 0;
+	UCH* pReadbuff = new UCH[1024];
+	while (true) {
+		size_t rdSize = fread(pReadbuff, 1, 1024, fInf);
+		if (rdSize == 0)
+			break;
+
+		fwrite(pReadbuff, 1, rdSize, fOut);
+		flagSize += rdSize;
+	}
+	fwrite(&flagSize, sizeof(flagSize), 1, fOut);
+	fwrite(&fileSize, sizeof(fileSize), 1, fOut);
+	delete[] pReadbuff;
+	fclose(fInf);
 }
 
 //chFlag:¸Ã×Ö½ÚÖĞµÄÃ¿¸ö±ÈÌØÎ»ÊÇÓÃÀ´Çø·Öµ±Ç°×Ö½ÚÊÇÔ­×Ö·û»¹ÊÇ³¤¶È?
@@ -182,17 +225,33 @@ USH LZ77::LongestMatch(USH matchHead, USH& MatchDist, USH start) {     //ÕÒ×î³¤Æ
 
 void LZ77::UNCompressFile(const std::string& strFilePath) {
 	//´ò¿ªÑ¹ËõÎÄ¼şºÍ±ê¼ÇÎÄ¼ş
-	FILE* fInD = fopen("2.txt", "rb");
+	FILE* fInD = fopen(strFilePath.c_str(), "rb");
 	if (nullptr == fInD) {
 		std::cout << "Ñ¹ËõÎÄ¼ş´ò¿ªÊ§°Ü" << std::endl;
 		return;
 	}
-	FILE* fInF = fopen("3.txt", "rb");
+
+	//²Ù×÷±ê¼ÇÊı¾İµÄÎÄ¼şÖ¸Õë
+	FILE* fInF = fopen(strFilePath.c_str(), "rb");
 	if (nullptr == fInF) {
-		fclose(fInD);
-		std::cout << "±ê¼ÇÎÄ¼ş´ò¿ªÊ§°Ü" << std::endl;
+		std::cout << "Ñ¹ËõÎÄ¼ş´ò¿ªÊ§°Ü" << std::endl;
 		return;
 	}
+	//»ñÈ¡Ô´ÎÄ¼ş´óĞ¡
+	ULL fileSize = 0;
+	fseek(fInF, 0 - sizeof(fileSize), SEEK_END);
+	fread(&fileSize, sizeof(fileSize), 1, fInF);
+
+	//»ñÈ¡±ê¼ÇĞÅÏ¢µÄ´óĞ¡
+	size_t flagSize = 0;
+	fseek(fInF, 0 - sizeof(fileSize) - sizeof(flagSize), SEEK_END);
+	fread(&flagSize, sizeof(flagSize), 1, fInF);
+
+	//½«¶ÁÈ¡±ê¼ÇĞÅÏ¢µÄÎÄ¼şÖ¸ÕëÒÆ¶¯µ½±£´æ±ê¼ÇÊı¾İµÄÆğÊ¼Î»ÖÃ
+	fseek(fInF, 0 - sizeof(flagSize) - sizeof(fileSize) - flagSize, SEEK_END);
+
+
+	//¿ªÊ¼½âÑ¹Ëõ
 
 	//Ğ´½âÑ¹ËõÊı¾İ
 	FILE* fOut = fopen("4.txt", "wb");
@@ -201,7 +260,8 @@ void LZ77::UNCompressFile(const std::string& strFilePath) {
 	FILE* fR = fopen("4.txt", "rb");
 	UCH bitCount = 0;
 	UCH chFlag = 0;
-	while (!feof(fInD)) {
+	ULL encodeCount = 0;
+	while (encodeCount < fileSize) {
 		//¶ÁÈ¡±ê¼Ç
 		if (0 == bitCount) {
 			chFlag=fgetc(fInF);
@@ -215,6 +275,10 @@ void LZ77::UNCompressFile(const std::string& strFilePath) {
 
 			//Çå¿Õ»º³åÇø
 			fflush(fOut);
+			
+			//¸üĞÂÒÑ¾­½âÂëµÄ×Ö½ÚÊı´óĞ¡
+			encodeCount += matchLen;
+
 			//fR£º¶ÁÈ¡Ç°ÎÄÆ¥Åä´®ÖĞµÄÄÚÈİ
 			UCH ch;
 			fseek(fR, 0 - matchDist, SEEK_END);
@@ -222,12 +286,17 @@ void LZ77::UNCompressFile(const std::string& strFilePath) {
 				ch = fgetc(fR);
 				fputc(ch, fOut);
 				--matchLen;
+
+				//ÔÚ»¹Ô­³¤¶È¾àÀë¶ÔÊ±£¬Ò»¶¨ÒªÇå¿Õ»º³åÇø£¬·ñÔò¿ÉÄÜ»á»¹Ô­³ö´í
+
+				fflush(fOut);
 			}
 		}
 		else {
 			//Ô­×Ö·û
 			UCH ch = fgetc(fInD);
 			fputc(ch, fOut);
+			encodeCount += 1;
 		}
 		chFlag <<= 1;
 		bitCount--;

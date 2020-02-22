@@ -9,8 +9,8 @@ int main()
 	//fc.CompressFile("test.txt");
 	//fc.UnCompressFile("2.txt");
 	LZ77 lz;
-	//lz.CompressFile("test.txt");
-	lz.UNCompressFile("2.lzp");
+	lz.CompressFile("test.txt");
+	lz.UNCompressFile("2.txt");
 	system("pause");
 	return 0;
 }
