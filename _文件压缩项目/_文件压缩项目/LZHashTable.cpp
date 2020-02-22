@@ -59,6 +59,6 @@ void LZHashTable::Update() {
 		if (prev_[i] >= WSIZE)
 			prev_[i] -= WSIZE;
 		else
-			head_[i] = 0;
+			prev_[i] = 0;
 	}
 }
