@@ -24,12 +24,24 @@ void HashTable::Insert(USH& matchhead, UCH ch, USH pos, USH& hashAddr) {
 	head_[hashAddr] = pos;
 }
 USH HashTable::GetNext(USH matchHead) {
-	return prev_[matchHead&&HASH_MASK];
+	return prev_[matchHead&HASH_MASK];
 }
-
 void HashTable::hashFunc(USH& hashAddr, UCH ch) {      //hashAddr是输入，输出型参数，ch是所查找字符串中第一个字符
 	hashAddr = (((hashAddr) << H_SHIFT()) ^ (ch))&HASH_MASK;
 }
 USH HashTable::H_SHIFT() {
 	return (HASH_BITS + MIN_MATCH - 1) / MIN_MATCH;     //5
+}
+void HashTable::Update() {
+	for (size_t i = 0; i < WSIZE; ++i) {
+		if (head_[i] > WSIZE)
+			head_[i] -= WSIZE;
+		else
+			head_[i] = 0;
+
+		if (prev_[i] > WSIZE)
+			prev_[i] -= WSIZE;
+		else
+			prev_[i] = 0;
+	}
 }

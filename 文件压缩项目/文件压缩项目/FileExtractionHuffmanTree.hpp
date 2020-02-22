@@ -66,7 +66,6 @@ public:
 					ch = ch << 1;
 				}
 			}
-			
 		}
 		LOOP:
 		fclose(pRead);
