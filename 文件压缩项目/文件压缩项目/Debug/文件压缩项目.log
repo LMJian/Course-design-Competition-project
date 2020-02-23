@@ -1,5 +1,6 @@
 ﻿  HashTable.cpp
   LZ77.cpp
+c:\users\administrator\desktop\github\course-design-competition-project\文件压缩项目\文件压缩项目\lz77.cpp(204): warning C4244: “参数”: 从“ULL”转换到“long”，可能丢失数据
   main.cpp
   正在生成代码...
   文件压缩项目.vcxproj -> C:\Users\Administrator\Desktop\Github\Course-design-Competition-project\文件压缩项目\Debug\文件压缩项目.exe

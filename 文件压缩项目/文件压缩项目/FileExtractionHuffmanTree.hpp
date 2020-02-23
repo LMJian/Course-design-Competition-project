@@ -34,8 +34,8 @@ public:
 
 		InitTree();      //将队列里的结点初始化为Huffman树
 
-		std::string newFileName = "new" + fileName_.substr(0, fileName_.rfind('.')) + endName_;
-		FILE *pWrite = fopen(newFileName.c_str(), "wb");
+		//std::string newFileName = "new" + fileName_.substr(0, fileName_.rfind('.')) + endName_;
+		FILE *pWrite = fopen("h2.bin", "wb");
 		if (pWrite == NULL) {
 			perror("fopen file error!");
 			return;

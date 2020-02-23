@@ -28,8 +28,14 @@ int main() {
 	TestFileExtraction();
 	_CrtDumpMemoryLeaks();*/
 	LZ77 lz;
-	lz.CompressionFile("test.txt");
-
+	lz.CompressionFile("_疯狂Python讲义_.pdf");
+	
+	FileCompressionHuffManTree tree("LZ77.bin");   //指定要压缩的文件             
+	tree.Compress();
+	
+	FileExtractionHuffManTree tree1("Huffman.bin");    //指定要解压的文件
+	tree1.UnCompress();
+	lz.UnCompressionFile("h2.bin");
 	system("pause");
 	return 0;
 }

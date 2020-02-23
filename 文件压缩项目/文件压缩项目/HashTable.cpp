@@ -16,9 +16,10 @@ HashTable::~HashTable() {
 	prev_ = nullptr;
 }
 void HashTable::Insert(USH& matchhead, UCH ch, USH pos, USH& hashAddr) {
-	hashFunc(hashAddr, ch);//获取本次插入字符串的哈希地址
+	hashFunc(hashAddr, ch);//获取本次插入的哈希地址
 
-	matchhead = head_[hashAddr];//获取上一次匹配的字符串地址
+	matchhead = head_[hashAddr];//获取上一次匹配的字符串头
+	
 	//将新的哈希地址插入链表
 	prev_[pos&HASH_MASK] = head_[hashAddr];
 	head_[hashAddr] = pos;
@@ -26,22 +27,23 @@ void HashTable::Insert(USH& matchhead, UCH ch, USH pos, USH& hashAddr) {
 USH HashTable::GetNext(USH matchHead) {
 	return prev_[matchHead&HASH_MASK];
 }
-void HashTable::hashFunc(USH& hashAddr, UCH ch) {      //hashAddr是输入，输出型参数，ch是所查找字符串中第一个字符
-	hashAddr = (((hashAddr) << H_SHIFT()) ^ (ch))&HASH_MASK;
-}
-USH HashTable::H_SHIFT() {
-	return (HASH_BITS + MIN_MATCH - 1) / MIN_MATCH;     //5
-}
 void HashTable::Update() {
 	for (size_t i = 0; i < WSIZE; ++i) {
+		//更新head
 		if (head_[i] > WSIZE)
 			head_[i] -= WSIZE;
 		else
 			head_[i] = 0;
-
+		//更新prev
 		if (prev_[i] > WSIZE)
 			prev_[i] -= WSIZE;
 		else
 			prev_[i] = 0;
 	}
+}
+void HashTable::hashFunc(USH& hashAddr, UCH ch) {
+	hashAddr = (((hashAddr) << H_SHIFT()) ^ (ch))&HASH_MASK;
+}
+USH HashTable::H_SHIFT() {
+	return (HASH_BITS + MIN_MATCH - 1) / MIN_MATCH;
 }

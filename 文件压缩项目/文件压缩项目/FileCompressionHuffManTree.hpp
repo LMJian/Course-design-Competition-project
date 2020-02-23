@@ -57,9 +57,9 @@ public:
 		if (root_)
 			InitChPW(root_);    //获取每个字符对应的密码，          （此处是递归需要优化）
 		
-		std::string BinFileName = fileName_.substr(0, fileName_.rfind('.'));
-		BinFileName += ".bin";
-		FILE *pWrite = fopen(BinFileName.c_str(), "wb");
+		//std::string BinFileName = fileName_.substr(0, fileName_.rfind('.'));
+		//BinFileName += ".bins";
+		FILE *pWrite = fopen("Huffman.bin", "wb");
 		if (pWrite == NULL) {
 			perror("fopen file error!");
 			return;
