@@ -16,4 +16,5 @@ private:
 private:
 	UCH* pWin_;
 	HashTable ht_;
+	std::string fileName_;
 };

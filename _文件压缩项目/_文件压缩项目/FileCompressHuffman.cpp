@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS 1 
-#include "FileCompressHuffman.h"
+#include"FileCompressHuffman.h"
 
 FileCompressHuffman::FileCompressHuffman()
 {
@@ -49,7 +49,7 @@ void FileCompressHuffman::CompressFile(const std::string& path)
 		assert(false);
 		return;
 	}
-	WriteHead(fOut, path);           //1111111111
+	WriteHead(fOut, path);           
 	
 	fseek(fIn, 0, SEEK_SET);
 	int ch = 0;
@@ -115,11 +115,13 @@ void FileCompressHuffman::UnCompressFile(const std::string& path) {
 		}
 		_fileInfo[(unsigned char)strchCount[0]]._count = atoi(strchCount.c_str() + 2);
 	}
+
 	HuffmanTree<CharInfo> t;
 	t.CreateHuffmanTree(_fileInfo, CharInfo(0));
 	
 	std::string newFileName = "new" + _fileName;
 	FILE* fOut = fopen(newFileName.c_str(),"wb");
+	
 	char *pReadBuff = new char[1024];
 	char ch = 0;
 	HuffmanTreeNode<CharInfo>* pCur = t.GetRoot();

@@ -14,6 +14,7 @@ LZ77::~LZ77() {
 	pWin_ = nullptr;
 }
 void LZ77::CompressionFile(const std::string& fileName) {
+	fileName_ = fileName;
 	FILE* fR = fopen(fileName.c_str(), "rb");
 	if (!fR) {
 		std::cout << "待压缩文件打开失败!" << std::endl;
@@ -203,8 +204,9 @@ void LZ77::UnCompressionFile(const std::string& fileName) {
 	//将文件指针指向标记文件起始
 	fseek(fRT, 0 - sizeof(fileSize) - sizeof(flagSize) - flagSize, SEEK_END);
 
-	FILE* fW = fopen("4.txt", "wb");  //将解压后的数据写入到新文件
-	FILE* fWr = fopen("4.txt", "rb"); //读取新文件已写入的部分
+	std::string newFile = "new" + fileName_;
+	FILE* fW = fopen(newFile.c_str(), "wb");  //将解压后的数据写入到新文件
+	FILE* fWr = fopen(newFile.c_str(), "rb"); //读取新文件已写入的部分
 	if (!fW||!fWr) {
 		std::cout << "新文件打开/读取失败" << std::endl;
 		return;

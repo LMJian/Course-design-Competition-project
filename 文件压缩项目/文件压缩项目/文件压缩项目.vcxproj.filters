@@ -26,12 +26,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FileExtractionHuffmanTree.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="FileCompressionHuffManTree.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Common.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -39,6 +33,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="LZ77.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Huffman.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FileCompressHuffman.cpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FileCompressHuffman.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
