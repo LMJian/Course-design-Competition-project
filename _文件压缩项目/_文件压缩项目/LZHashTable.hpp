@@ -1,17 +1,17 @@
 #pragma once
 #include"Common.hpp"
 
-class LZHashTable {
+class HashTable {
 public:
-	LZHashTable(USH size);
-	~LZHashTable();
-	void Insert(USH& matchHead, UCH ch, USH pos, USH& hashAddr);
-	void HashFunc(USH& hashAddr, UCH ch);
+	HashTable(USH size);
+	~HashTable();
+	void Insert(USH& matchhead, UCH ch, USH pos, USH& hashAddr);
+	void hashFunc(USH& hashAddr, UCH ch);
 	USH GetNext(USH matchHead);
 	void Update();
 private:
 	USH H_SHIFT();
 private:
-	USH* prev_;
-	USH* head_;
+	USH *prev_;
+	USH *head_;
 };

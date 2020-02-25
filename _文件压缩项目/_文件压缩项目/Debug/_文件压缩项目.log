@@ -1,2 +1,17 @@
-﻿  FileCompressTest.cpp
-  _文件压缩项目.vcxproj -> C:\Users\Administrator\Desktop\Github\Course-design-Competition-project\_文件压缩项目\Debug\_文件压缩项目.exe
+﻿  FileCompressHuffman.cpp
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(88): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(101): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(129): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(178): error C3861: “ProStrBuf”: 找不到标识符
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(183): error C2511: “void FileCompressHuffman::bitToStr(unsigned char *,unsigned char *,const int)”:“FileCompressHuffman”中没有找到重载的成员函数
+  c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.h(27): note: 参见“FileCompressHuffman”的声明
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(197): error C2039: “ProStrBuf”: 不是“FileCompressHuffman”的成员
+  c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.h(27): note: 参见“FileCompressHuffman”的声明
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(209): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(236): warning C4267: “初始化”: 从“size_t”转换到“unsigned char”，可能丢失数据
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\filecompresshuffman.cpp(239): warning C4018: “<”: 有符号/无符号不匹配
+  FileCompressTest.cpp
+  LZ77.cpp
+c:\users\administrator\desktop\github\course-design-competition-project\_文件压缩项目\_文件压缩项目\lz77.cpp(205): warning C4244: “参数”: 从“ULL”转换到“long”，可能丢失数据
+  LZHashTable.cpp
+  正在生成代码...

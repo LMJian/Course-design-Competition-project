@@ -1,235 +1,253 @@
-#define _CRT_SECURE_NO_WARNINGS 1 
+#define _CRT_SECURE_NO_WARNINGS 1
 #include"FileCompressHuffman.h"
+#include<iostream>
 
-FileCompressHuffman::FileCompressHuffman()
-{
-	_fileInfo.resize(256);
-	for (int i = 0; i < 256; i++)
-	{
-		_fileInfo[i]._ch = i;
-		_fileInfo[i]._count = 0;
-	}
-}
+FileCompressHuffman::FileCompressHuffman() {}
 
-void FileCompressHuffman::CompressFile(const std::string& path)
-{
-	_fileName = path;
-	FILE* fIn = fopen(path.c_str(), "rb");
-	if (nullptr == fIn)
-	{
-		assert(false);
+void FileCompressHuffman::CompressFile(const std::string& fileName) {
+	FILE *pFile = fopen(fileName.c_str(), "rb");//因为这里压缩的不一定是文本文件
+												 //用二进制方式打开更为合理
+	if (!pFile) {
+		std::cout << "open file " << fileName << " error!" << std::endl;
 		return;
 	}
 	//1、统计源文件中每个字符出现的次数
-	unsigned char* pReadBuff = new unsigned char[1024];
-	size_t readSize = 0;
-	while (true)
-	{
-		readSize = fread(pReadBuff, 1, 1024, fIn);
-		if (0 == readSize)
-		{
+	unsigned char buf[1024] = { 0 };   //一次读取文件的1024个字节
+									   //这里不能出现负数，因为无法作为count数组的下标，所以要用unsigned char 
+	int rdSize = 0;
+	std::vector<int> count;
+	count.resize(256);
+	while (1) {
+		rdSize = fread(buf, 1, 1024, pFile);
+		for (int i = 0; i < rdSize; ++i) {
+			++count[buf[i]];
+		}
+		if (rdSize < 1024)
 			break;
-		}
-		for (size_t i = 0; i < readSize; i++)
-		{
-			_fileInfo[pReadBuff[i]]._count++;
-		}
 	}
-
 	//2、以字符出现的次数为权值创建huffman树
-	HuffmanTree<CharInfo> tree(_fileInfo, CharInfo());  //出现0次的无效的字符将不会参与huffman树的构造
+	HuffmanTree tree(count);
+	//3、获取每个字符的深度
+	std::vector<ParHuffNode*> ChBitLen;
+	GetBitLength(tree.GetRoot(), ChBitLen, 0);
 
-	//3、获取每个字符的编码
-	GenerateHuffmanCode(tree.GetRoot());
+	//按照长度为第一优先，字符值为第二优先排序ChBitLen
+	MySort(ChBitLen);
 
-	//4、用获取到的编码重新改写源文件
-	FILE* fOut = fopen("2.txt", "wb");
-	if (nullptr == fOut)
-	{
-		assert(false);
+	//4.计算每个字符的编码
+	std::vector<std::string> strCode;
+	strCode.resize(256);
+	CalCharCode(ChBitLen, strCode);
+
+	//5、用获取到的编码重新改写源文件
+	FILE *pWrite = fopen("Huffman.bin", "wb");
+	if (!pWrite) {
+		std::cout << "open Huffman.bin error!" << std::endl;
 		return;
 	}
-	WriteHead(fOut, path);           
-	
-	fseek(fIn, 0, SEEK_SET);
-	int ch = 0;
+	//写入头部信息
+	WriteHead(pWrite, ChBitLen);
+	fseek(pFile, 0, SEEK_SET);
+
+	unsigned char ch = 0;
 	int bitCount = 0;
-	while (true)
-	{
-		readSize = fread(pReadBuff, 1, 1024, fIn);
-		if (0 == readSize)
-		{
-			break;
-		}
-		//根据字节的编码对读取到的内容进行重写
-		for (size_t i = 0; i < readSize; i++)
-		{
-			std::string strCode = _fileInfo[pReadBuff[i]]._strCode;
-			for (size_t j = 0; j < strCode.size(); j++)
-			{
+	while (1) {
+		rdSize = fread(buf, 1, 1024, pFile);
+		for (int i = 0; i < rdSize; ++i) {
+			std::string passWord = strCode[buf[i]];//读取buf[i]对应的密码
+			for (size_t j = 0; j < passWord.size(); ++j) {
 				ch <<= 1;
-				if ('1' == strCode[j])
-				{
+				++bitCount;
+				if (passWord[j] == '1') {
 					ch |= 1;
 				}
-				bitCount++;
-				if (8 == bitCount)
-				{
-					fputc(ch, fOut);  //往文件中一次写入一个字节
+				if (bitCount == 8) {
+					fputc(ch, pWrite);
 					bitCount = 0;
 					ch = 0;
 				}
 			}
 		}
-	}
-	//最后一次ch中可能不够8个bit位
-	if (bitCount < 8)
-	{
-		ch <<= (8 - bitCount);
-		fputc(ch, fOut);
-	}
-
-	delete[] pReadBuff;
-	fclose(fIn);
-	fclose(fOut);
-}
-
-void FileCompressHuffman::UnCompressFile(const std::string& path) {
-	FILE* fIn = fopen(path.c_str(), "rb");
-	if (nullptr == fIn) {
-		assert(false);
-		return;
-	}
-	std::string strFilePostFix;
-	ReadLine(fIn, strFilePostFix);
-
-	std::string strCount;
-	ReadLine(fIn, strCount);
-	int lineCount = atoi(strCount.c_str());
-	for (int i = 0; i < lineCount; ++i) {
-		std::string strchCount;
-		ReadLine(fIn, strchCount);
-		if (strchCount.empty()) {
-			strchCount += '\n';
-			ReadLine(fIn,strchCount);
-		}
-		_fileInfo[(unsigned char)strchCount[0]]._count = atoi(strchCount.c_str() + 2);
-	}
-
-	HuffmanTree<CharInfo> t;
-	t.CreateHuffmanTree(_fileInfo, CharInfo(0));
-	
-	std::string newFileName = "new" + _fileName;
-	FILE* fOut = fopen(newFileName.c_str(),"wb");
-	
-	char *pReadBuff = new char[1024];
-	char ch = 0;
-	HuffmanTreeNode<CharInfo>* pCur = t.GetRoot();
-	size_t fileSize = pCur->_Weight._count;
-	size_t unCount = 0;
-	while (1) {
-		size_t rdsize = fread(pReadBuff, 1, 1024, fIn);
-		if (rdsize == 0) {
+		if (rdSize < 1024)
 			break;
+	}
+	if (bitCount > 0) {
+		ch = ch << (8 - bitCount);
+		fputc(ch, pWrite);
+	}
+	fclose(pFile);
+	fclose(pWrite);
+}
+void FileCompressHuffman::CalCharCode(std::vector<ParHuffNode*>& ChBitLen, std::vector<std::string>& strCode) {
+	std::string str = "";
+	int count = ChBitLen[0]->bitLen_;
+	while (count--) {
+		str += "0";
+	}
+	ChBitLen[0]->str_ = str;
+	for (int i = 1; i < ChBitLen.size(); ++i) {
+		if (ChBitLen[i]->bitLen_ == ChBitLen[i - 1]->bitLen_) {//等长，属于同一组，加一操作
+			ChBitLen[i]->str_ = strPlusOne(ChBitLen[i - 1]->str_, 1);
 		}
-		for (size_t i = 0; i < rdsize; ++i) {
-			ch = pReadBuff[i];
-			for (int pos = 0; pos < 8; ++pos) {
-				if (ch & 0x80) {
-					pCur = pCur->_pRight;
-				}
-				else {
-					pCur = pCur->_pLeft;
-				}
-				ch <<= 1;
-				if (nullptr == pCur->_pLeft&&nullptr == pCur->_pRight) {
-					++unCount;
-					fputc(pCur->_Weight._ch,fOut);
-					pCur = t.GetRoot();
-					if (unCount == fileSize)
-						break;
-
-				}
+		else {//不等长，加一 ，左移
+			std::string t = strPlusOne(ChBitLen[i - 1]->str_, 1);
+			int n = ChBitLen[i]->bitLen_ - ChBitLen[i - 1]->bitLen_;
+			while (n--) {
+				t = t + "0";
 			}
-		}
-		
-	}
-	fclose(fIn);
-	fclose(fOut);
-	delete[] pReadBuff;
-}
-void FileCompressHuffman::ReadLine(FILE* fIn, std::string& strInfo) {
-	assert(fIn);
-	while (!feof(fIn))
-	{
-		char ch = fgetc(fIn);
-		if (ch == '\n')
-			break;
-		strInfo += ch;
-	}
-}
-void FileCompressHuffman::WriteHead(FILE* fOut, const std::string& fileName) {
-	assert(fOut);
-	std::string strHead;
-	strHead += GetFilePostFix(fileName);
-	strHead += '\n';
-
-	size_t lineCount = 0;
-	std::string strChCount;
-	char szValue[32] = { 0 };
-	for (int i = 0; i < 256; ++i) {
-		CharInfo& charInfo = _fileInfo[i];
-		if (charInfo._count) {
-			lineCount++;
-			strChCount += _fileInfo[i]._ch;
-			strChCount += ':';
-			_itoa(charInfo._count, szValue, 10);
-			strChCount += szValue;
-			strChCount += '\n';
+			ChBitLen[i]->str_ = t;
 		}
 	}
-	_itoa(lineCount, szValue, 10);
-	strHead += szValue;
-	strHead += '\n';
-	strHead += strChCount;
-
-	fwrite(strHead.c_str(), 1, strHead.size(), fOut);
-}
-
-std::string  FileCompressHuffman::GetFilePostFix(const std::string& fileName) {
-	return fileName.substr(fileName.rfind('.'));
-}
-
-void FileCompressHuffman::GenerateHuffmanCode(HuffmanTreeNode<CharInfo>* pRoot)  //生成huffman编码
-{
-	if (nullptr == pRoot)
-	{
-		return;
+	for (int i = 0; i < ChBitLen.size(); ++i) {
+		strCode[ChBitLen[i]->Ch_] = ChBitLen[i]->str_;
 	}
-	GenerateHuffmanCode(pRoot->_pLeft);
-	GenerateHuffmanCode(pRoot->_pRight);
-
-	if (nullptr == pRoot->_pLeft && nullptr == pRoot->_pRight)
-	{//叶子节点，要编码的字符
-		std::string strCode;
-		HuffmanTreeNode<CharInfo>* pCur = pRoot;
-		HuffmanTreeNode<CharInfo>* pParent = pCur->_pParent;
-
-		while (pParent)
-		{
-			if (pCur == pParent->_pLeft)
-			{
-				strCode += '0';
+}
+std::string FileCompressHuffman::strPlusOne(const std::string& str, unsigned char count) {
+	std::string ret = str;
+	while (count--) {
+		auto it = ret.rbegin();
+		bool flag = true;
+		while (it != ret.rend()) {
+			if (flag) {
+				++(*it);
+				flag = false;
+			}
+			if (*it == '2') {
+				*it = 0;
+				flag = true;
 			}
 			else
-			{
-				strCode += '1';
-			}
-			pCur = pParent;
-			pParent = pCur->_pParent;
+				break;
+			++it;
 		}
-		reverse(strCode.begin(), strCode.end());
-
-		_fileInfo[pRoot->_Weight._ch]._strCode = strCode;
+		if (flag)
+			ret = "1" + ret;
 	}
+	return ret;
+}
+void FileCompressHuffman::MySort(std::vector<ParHuffNode*>& ChBitLen) {
+	for (int i = 1; i < ChBitLen.size(); ++i) {
+		int j = i;
+		while (j >0 && Compare(ChBitLen[i - 1], ChBitLen[i])) {
+			ParHuffNode* tmp = ChBitLen[i - 1];
+			ChBitLen[i - 1] = ChBitLen[i];
+			ChBitLen[i] = tmp;
+			--j;
+		}
+	}
+}
+bool FileCompressHuffman::Compare(const ParHuffNode* left, const ParHuffNode* right) {//升序
+	if (left->bitLen_ > right->bitLen_)
+		return true;
+	else if (left->bitLen_ == right->bitLen_&&left->Ch_ > right->Ch_)
+		return true;
+	else
+		return false;
+}
+void FileCompressHuffman::UnCompressFile(const std::string& fileName) {
+	FILE *pRead = fopen(fileName.c_str(), "rb");
+	if (!pRead) {
+		std::cout << "open file " << fileName << " error!" << std::endl;
+		return;
+	}
+	//读取头部信息
+	std::vector<ParHuffNode*> ChBitLen;
+	ReadHead(pRead, ChBitLen);
+
+	//计算解码表
+	std::vector<DecTable*> decTable;
+	CalDecTable(ChBitLen, decTable);
+
+	FILE *pWrite = fopen("h2.bin", "wb");
+	if (pWrite == NULL) {
+		std::cout << "open h2.bin error!" << std::endl;
+		return;
+	}
+
+	//开始解压缩
+	int strIndex = 0;  //缓冲区剩余多少字符
+	unsigned char readBuf[128] = { 0 };
+	unsigned char strBuf[1024] = { 0 };
+	while (1) {
+		int n = fread(readBuf, 1, 128 - (strIndex / 8) - 1, pRead);
+		if (!n)
+			break; 
+		//将读取的二进制转为字符串
+		bitToStr(readBuf, n, strBuf + strIndex);
+		//根据解码表，解压缩
+		while (ProStrBuf(decTable, strBuf, strIndex)) {}
+	}
+	fclose(pRead);
+	fclose(pWrite);
+}
+void FileCompressHuffman::bitToStr(unsigned char* readBuf, unsigned char* strBuf, const int n) {
+	int strIndex = 0;
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < 8; ++j) {
+			if (readBuf[i] & 0x80) {//转为字符1
+				strBuf[strIndex++] = '1';
+			}
+			else {//转为字符0
+				strBuf[strIndex++] = '0';
+			}
+			readBuf[i] <<= 1;
+		}
+	}
+}
+bool FileCompressHuffman::ProStrBuf(const std::vector<DecTable*>& decTable, const unsigned char* readRuf) {
+
+}
+void FileCompressHuffman::CalDecTable(const std::vector<ParHuffNode*>& ChBitLen, std::vector<DecTable*>& decTable) {
+	unsigned char bitLen = ChBitLen[0]->bitLen_;
+	std::string headStr = "";
+	int count = bitLen;
+	while (count--) {
+		headStr += "0";
+	}
+	decTable.push_back(new DecTable(bitLen, headStr, 0));
+	int tableIndex = 0;
+	for (int i = 1; i < ChBitLen.size(); ++i) {
+		if (ChBitLen[i]->bitLen_ == ChBitLen[i - 1]->bitLen_) {
+			++(decTable[tableIndex]->chCount_);
+		}
+		else {
+			bitLen = ChBitLen[i]->bitLen_;
+			std::string headStr = strPlusOne(decTable[tableIndex]->headStr_, decTable[tableIndex]->chCount_);
+			int moveLeft = bitLen - decTable[tableIndex]->bitLen_;
+			while (moveLeft--) {
+				headStr = headStr + "0";
+			}
+			decTable.push_back(new DecTable(bitLen, headStr, i));
+			++tableIndex;
+		}
+	}
+}
+
+void FileCompressHuffman::ReadHead(FILE* pRead, std::vector<ParHuffNode*>& ChBitLen){
+	unsigned char count = fgetc(pRead);
+	for (int i = 0; i < count; ++i) {
+		unsigned char ch = fgetc(pRead);
+		unsigned char len = fgetc(pRead);
+		ChBitLen.push_back(new ParHuffNode(ch, len));
+	}
+}
+void FileCompressHuffman::WriteHead(FILE* pWrite, const std::vector<ParHuffNode*>& ChBitLen) {
+	//写入字符个数
+	unsigned char count = ChBitLen.size();
+	fputc(count, pWrite);
+	//写入每个字符和码字长度
+	for (int i = 0; i < ChBitLen.size(); ++i) {
+		fputc(ChBitLen[i]->Ch_, pWrite);
+		fputc(ChBitLen[i]->bitLen_, pWrite);
+	}
+}
+void FileCompressHuffman::GetBitLength(HuffManTreeNode* ptr, std::vector<ParHuffNode*>& ChBitLen, unsigned char bitLen) {
+	if (!ptr->pLeft_ && !ptr->pRight_) {//找到了叶子节点
+		ChBitLen.push_back(new ParHuffNode(ptr->Ch_, bitLen));
+		return;
+	}
+	if (ptr->pLeft_)
+		GetBitLength(ptr->pLeft_, ChBitLen, bitLen + 1);
+	if (ptr->pRight_)
+		GetBitLength(ptr->pRight_, ChBitLen, bitLen + 1);
 }

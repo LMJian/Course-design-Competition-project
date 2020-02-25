@@ -1,53 +1,43 @@
-//基于huffman的压缩
 #pragma once
+#include<string>
+#include<iostream>
+#include"Huffman.hpp"
 
-#include <assert.h>
-#include <vector>
-#include <string>
-#include "Huffman.hpp"
-
-
-//将权值用结构体表示,所以需要在huffman中的操作符进行重载
-struct CharInfo
-{
-	unsigned char _ch;  //具体字符
-	size_t _count;  //字符出现次数
-	std::string _strCode;  //字符编码
-
-	CharInfo(size_t count = 0)
-		: _count(count)
+struct ParHuffNode {
+	ParHuffNode(unsigned char ch, unsigned char len)
+		:Ch_(ch)
+		,bitLen_(len)
 	{}
-
-	CharInfo operator+(const CharInfo& ch) const
-	{
-		return CharInfo(_count + ch._count);
-	}
-
-	bool operator>(const CharInfo& ch) const
-	{
-		return _count > ch._count;
-	}
-
-	bool operator==(const CharInfo& ch) const
-	{
-		return _count == ch._count;
-	}
+	unsigned char Ch_;
+	unsigned char bitLen_;
+	std::string str_;
 };
-
-class FileCompressHuffman
-{
+struct DecTable {
+	DecTable(unsigned char len, std::string str, unsigned char index)
+		:bitLen_(len)
+		, headStr_(str)
+		, chCount_(0)
+		, index_(index)
+	{}
+	unsigned char bitLen_;  //编码位长
+	std::string headStr_;   //首编码
+	unsigned char chCount_; //符号数量
+	unsigned char index_;   //符号索引
+};
+class FileCompressHuffman {
 public:
 	FileCompressHuffman();
-	void CompressFile(const std::string& path);
-	void UnCompressFile(const std::string& path);
-	
+	void CompressFile(const std::string& fileName);
+	void UnCompressFile(const std::string& fileName);
 private:
-	void GenerateHuffmanCode(HuffmanTreeNode<CharInfo>* pRoot);  //生成huffman编码
-	void WriteHead(FILE* fOut, const std::string& filePostFix);
-	std::string GetFilePostFix(const std::string& fileName);
-	void ReadLine(FILE* fIn, std::string& strInfo);
-
-private:
-	std::vector<CharInfo> _fileInfo;
-	std::string _fileName;
+	void ReadHead(FILE* pRead, std::vector<ParHuffNode*>& ChBitLen);
+	void WriteHead(FILE* pWrite, const std::vector<ParHuffNode*>& ChBitLen);
+	void GetBitLength(HuffManTreeNode* ptr, std::vector<ParHuffNode*>& ChBitLen, unsigned char bitLen);
+	void MySort(std::vector<ParHuffNode*>& ChBitLen);
+	bool Compare(const ParHuffNode* left, const ParHuffNode* right);
+	void CalCharCode(std::vector<ParHuffNode*>& ChBitLen, std::vector<std::string>& strCode);
+	std::string strPlusOne(const std::string& str, unsigned char count);
+	void CalDecTable(const std::vector<ParHuffNode*>& ChBitLen, std::vector<DecTable*>& decTable);
+	bool IsNext(int index, const std::vector<DecTable*>& decTable, const unsigned char* readRuf);
+	void bitToStr(unsigned char* readBuf, const int n, unsigned char* strBuf);
 };

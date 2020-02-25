@@ -1,107 +1,75 @@
 #pragma once
+#include<queue>
+#include<vector>
+#include<stack>
 
-#include <vector>
-#include <queue>
-
-template<class T>
-struct HuffmanTreeNode
-{
-	HuffmanTreeNode(const T& weight = T())
-		: _pLeft(nullptr)
-		, _pRight(nullptr)
-		, _pParent(nullptr)
-		, _Weight(weight)
+struct HuffManTreeNode {
+	HuffManTreeNode(unsigned long long weight, unsigned char ch = 0)
+		:pLeft_(nullptr)
+		, pRight_(nullptr)
+		, Weight_(weight)
+		, Ch_(ch)
 	{}
-	HuffmanTreeNode<T>* _pLeft;
-	HuffmanTreeNode<T>* _pRight;
-	HuffmanTreeNode<T>* _pParent;
-	T _Weight;  //权值
+	HuffManTreeNode *pLeft_;
+	HuffManTreeNode *pRight_;
+	unsigned long long Weight_;                    //权值
+	unsigned char Ch_;              //待压缩字符
 };
 
-template<class T>
-class Less
-{
-	typedef HuffmanTreeNode<T> Node;
-	
+class Less {            //使用小堆
 public:
-	bool operator()(const Node* pLeft, const Node* pRight)
-	{
-		return pLeft->_Weight > pRight->_Weight;  //根据大于的方式构造出小根堆
+	bool operator()(const HuffManTreeNode* pLeft, const HuffManTreeNode* pRight) {
+		return pLeft->Weight_ > pRight->Weight_;
 	}
 };
 
-template<class T>
-class HuffmanTree
-{
-	typedef HuffmanTreeNode<T> Node;
-
+class HuffmanTree {
+	typedef HuffManTreeNode Node;
+	typedef HuffManTreeNode* PNode;
 public:
-	HuffmanTree()
-		: _pRoot(nullptr)
-	{}
-
-	HuffmanTree(const std::vector<T> vWeight, const T& invalid_weight)
-		: _pRoot(nullptr)
+	HuffmanTree(const std::vector<int> arr)
+		:pRoot_(nullptr)
 	{
-		CreateHuffmanTree(vWeight, invalid_weight);
+		CreateHuffmanTree(arr);
 	}
-
-	~HuffmanTree()
-	{
-		Destory(_pRoot);
-	}
-
-	Node* GetRoot()
-	{
-		return _pRoot;
-	}
-
-
-	void CreateHuffmanTree(const std::vector<T> vWeight, const T& invalid_weight)
-	{
-		//1、构造森林
-		std::priority_queue<Node*, std::vector<Node*>, Less<T>> queue;
-		for (auto e : vWeight)
-		{
-			if (e == invalid_weight)
-			{//无效的字符，即未出现的字符，_count == 0
-				continue;
+	~HuffmanTree() {
+		std::stack<PNode> sa;
+		PNode ptr = pRoot_;
+		while (!sa.empty() || ptr) {
+			while (ptr) {
+				sa.push(ptr);
+				ptr = ptr->pLeft_;
 			}
-			queue.push(new Node(e));
-		}
-
-		//2、将森林中的树不断合并，构造haffman树
-		while (queue.size() > 1)
-		{
-			Node* pLeft = queue.top();
-			queue.pop();
-
-			Node* pRight = queue.top();
-			queue.pop();
-
-			Node* pParent = new Node(pLeft->_Weight + pRight->_Weight);
-			pParent->_pLeft = pLeft;
-			pParent->_pRight = pRight;
-			pLeft->_pParent = pParent;
-			pRight->_pParent = pParent;
-
-			queue.push(pParent);
-		}
-
-		_pRoot = queue.top();
-	}
-private:
-
-	void Destory(Node*& pRoot)
-	{
-		if (pRoot)
-		{
-			Destory(pRoot->_pLeft);
-			Destory(pRoot->_pRight);
-			delete pRoot;
-			pRoot = nullptr;
+			PNode del = sa.top();
+			sa.pop();
+			ptr = del->pRight_;
+			delete del;
 		}
 	}
+	PNode GetRoot() {
+		return pRoot_;
+	}
 private:
-	Node* _pRoot;
+	void CreateHuffmanTree(const std::vector<int> count) {
+		//优先队列，小根堆
+		std::priority_queue<PNode, std::vector<PNode>, Less> que;
+		for (int i = 0; i < 256; ++i) {
+			if (count[i] > 0) { //筛选出现过的字符，压入队列
+				que.push(new Node(count[i], i));
+			}
+		}
+		while (que.size() > 1) {
+			PNode left = que.top();
+			que.pop();
+			PNode right = que.top();
+			que.pop();
+			PNode newNode = new Node(left->Weight_ + right->Weight_);
+			newNode->pLeft_ = left;
+			newNode->pRight_ = right;
+			que.push(newNode);
+		}
+		pRoot_ = que.top();
+	}
+private:
+	Node* pRoot_;
 };
