@@ -1,9 +1,9 @@
 #include<string.h>
 #include"HashTable.hpp"
 
-const USH HASH_BITS = 15;                  //¹þÏ£µØÖ·15Î»
-const USH HASH_SIZE = (1 << HASH_BITS);    //¹þÏ£µØÖ·¸öÊý 32K
-const USH HASH_MASK = HASH_SIZE - 1;       //·ÀÖ¹Òç³ö  µÍ15Î»È«1
+const USH HASH_BITS = 15;                  //ï¿½ï¿½Ï£ï¿½ï¿½Ö·15Î»
+const USH HASH_SIZE = (1 << HASH_BITS);    //ï¿½ï¿½Ï£ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ 32K
+const USH HASH_MASK = HASH_SIZE - 1;       //ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½  ï¿½ï¿½15Î»È«1
 
 HashTable::HashTable(USH size)
 	:prev_(new USH[2*size])
@@ -16,11 +16,11 @@ HashTable::~HashTable() {
 	prev_ = nullptr;
 }
 void HashTable::Insert(USH& matchhead, UCH ch, USH pos, USH& hashAddr) {
-	hashFunc(hashAddr, ch);//»ñÈ¡±¾´Î²åÈëµÄ¹þÏ£µØÖ·
+	hashFunc(hashAddr, ch);//ï¿½ï¿½È¡ï¿½ï¿½ï¿½Î²ï¿½ï¿½ï¿½Ä¹ï¿½Ï£ï¿½ï¿½Ö·
 
-	matchhead = head_[hashAddr];//»ñÈ¡ÉÏÒ»´ÎÆ¥ÅäµÄ×Ö·û´®Í·
+	matchhead = head_[hashAddr];//ï¿½ï¿½È¡ï¿½ï¿½Ò»ï¿½ï¿½Æ¥ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½Í·
 	
-	//½«ÐÂµÄ¹þÏ£µØÖ·²åÈëÁ´±í
+	//ï¿½ï¿½ï¿½ÂµÄ¹ï¿½Ï£ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	prev_[pos&HASH_MASK] = head_[hashAddr];
 	head_[hashAddr] = pos;
 }
@@ -29,12 +29,12 @@ USH HashTable::GetNext(USH matchHead) {
 }
 void HashTable::Update() {
 	for (size_t i = 0; i < WSIZE; ++i) {
-		//¸üÐÂhead
+		//ï¿½ï¿½ï¿½ï¿½head
 		if (head_[i] > WSIZE)
 			head_[i] -= WSIZE;
 		else
 			head_[i] = 0;
-		//¸üÐÂprev
+		//ï¿½ï¿½ï¿½ï¿½prev
 		if (prev_[i] > WSIZE)
 			prev_[i] -= WSIZE;
 		else
